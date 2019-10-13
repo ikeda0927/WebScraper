@@ -9,8 +9,11 @@ pattern1     = "^https?://"
 repattern1   = re.compile(pattern1)
 pattern2     = "[^/]+$"
 repattern2   = re.compile(pattern2)
+pattern3     = "^/"
+repattern3   = re.compile(pattern3)
 counter      = 0
 sleepTime    = 1
+exportFileName='list.txt'
 
 class Page:
     global crawledList
@@ -31,7 +34,7 @@ class Page:
                 if repattern1.match(hrefValue):
                     Page.links.append(hrefValue)
                 else:
-                    Page.links.append(repattern2.sub('',self.url)+hrefValue)
+                    Page.links.append(repattern2.sub('',self.url)+repattern3.sub('',hrefValue))
 
     def CompareLink(self,lines,link):
         judge=True
@@ -44,6 +47,7 @@ class Page:
 
     def Check(self):
         global counter
+        global exportFileName
         if self.type==0:
             for link in Page.links:
                 crawledJudge=False
@@ -54,7 +58,7 @@ class Page:
                 if not crawledJudge:
                     Page(link,self.type)
                 #リストをファイルに書き込む
-                with open('list.txt','a+') as f:
+                with open(exportFileName,'a+') as f:
                     f.seek(0)
                     lines=f.readlines()
                     print('Comparing : '+link)
@@ -101,9 +105,11 @@ def CrawlAllURLs(root):
 
 if __name__ == '__main__':
     if len(sys.argv)>=2:
+        if len(sys.argv)>=3:
+            exportFileName=sys.argv[2]
         CrawlSameRootURLs(sys.argv[1])
         print('Add '+str(counter)+' URLs')
         # sleepTime=2
         # CrawlAllURLs(sys.argv[1])
     else:
-        print('Enter domain as an argument')
+        print('Enter domain as a first argument (and enter export file name as a second argument)')
