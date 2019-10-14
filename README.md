@@ -2,7 +2,7 @@
 
 以下のスクリプトを実行する際は全て自己責任でお願いします。
 
-- [Spider.py](https://github.com/ikeda0927/WebScraper#Spider.py)  
+- [Spider.py](https://github.com/ikeda0927/WebScraper#spiderpy)  
 
 ### Spider.py
 ----
