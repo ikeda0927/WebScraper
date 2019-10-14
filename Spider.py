@@ -77,7 +77,7 @@ class Page:
                     if not crawledJudge:
                         Page(link,self.type)
                     #リストをファイルに書き込む
-                with open('list.txt','a+') as f:
+                with open(exportFileName,'a+') as f:
                     f.seek(0)
                     lines=f.readlines()
                     if self.CompareLink(lines,link):
