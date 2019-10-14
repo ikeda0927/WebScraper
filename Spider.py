@@ -7,13 +7,13 @@ import time
 crawledList  = list()
 pattern1     = "^https?://"
 repattern1   = re.compile(pattern1)
-pattern2     = "[^/]+$"
+pattern2     = "^https?://[^/]+/"
 repattern2   = re.compile(pattern2)
 pattern3     = "^/"
 repattern3   = re.compile(pattern3)
 counter      = 0
 sleepTime    = 1
-exportFileName='list.txt'
+# exportFileName='list.txt'
 
 class Page:
     global crawledList
@@ -22,19 +22,23 @@ class Page:
     # type=1 #0->CrawlAllURLs, 1->CrawlSameRootURLs
     links=list()
 
-    def FindMyLinks(self):
-        #linksにそのページ内のリンクを格納する。
-        time.sleep(sleepTime)
-        data=requests.get(self.url)
+    def FindMyLinks(self):#linksにそのページ内のリンクを格納する。
+        time.sleep(sleepTime)#Dos攻撃にならないように
+        print('ACCESS : '+self.url)
+        data=requests.get(self.url)#取得
         soup=BeautifulSoup(data.text,"html.parser")
-        aList=soup.select('a')
+        aList=soup.select('a')#aタグ取得
         for a in aList:
-            hrefValue=a['href']
+            try:
+                hrefValue=a['href']#href属性の取得
+            except KeyError:
+                continue
             if hrefValue != None:
-                if repattern1.match(hrefValue):
+                if repattern1.match(hrefValue):#取得したhrefの値が絶対パスの場合->そのまま
                     Page.links.append(hrefValue)
-                else:
-                    Page.links.append(repattern2.sub('',self.url)+repattern3.sub('',hrefValue))
+                else:#取得したhrefの値が相対パスの場合->絶対パスに変換
+                    Page.links.append(repattern2.match(self.url).group()+repattern3.sub('',hrefValue))
+                    # Page.links.append(repattern2.sub('',self.url)+repattern3.sub('',hrefValue))
 
     def CompareLink(self,lines,link):
         judge=True
@@ -47,7 +51,7 @@ class Page:
 
     def Check(self):
         global counter
-        global exportFileName
+        # global exportFileName
         if self.type==0:
             for link in Page.links:
                 crawledJudge=False
@@ -58,58 +62,77 @@ class Page:
                 if not crawledJudge:
                     Page(link,self.type)
                 #リストをファイルに書き込む
-                with open(exportFileName,'a+') as f:
+                with open(self.exportFileName,'a+') as f:
                     f.seek(0)
                     lines=f.readlines()
                     print('Comparing : '+link)
                     if self.CompareLink(lines,link):
                         counter += 1
-                        print('write '+link)
+                        print('WRITE  : '+link)
                         f.write(link+'\n')
         elif self.type==1:
             for link in Page.links:
-                if Page.rootURL in link:
+                if Page.rootURL in link:#URLがスクリプト実行時に指定したURLで始まるかの確認
                     crawledJudge=False
                     for crawled in crawledList:
-                        if crawled == link:
+                        if crawled == link:#もし既にアクセスしていたなら新たにPageインスタンスを作成しない
                             crawledJudge=True
                             break
                     if not crawledJudge:
-                        Page(link,self.type)
+                        Page(link,self.type,self.exportFileName)
                     #リストをファイルに書き込む
-                with open(exportFileName,'a+') as f:
-                    f.seek(0)
+                with open(self.exportFileName,'a+') as f:
+                    f.seek(0)#カーソル位置を先頭に戻す
                     lines=f.readlines()
-                    if self.CompareLink(lines,link):
+                    if self.CompareLink(lines,link):#リストにまだ追加されていなければ書き込む
                         counter += 1
-                        print('write '+link)
+                        print('WRITE  : '+link)
                         f.write(link+'\n')
 
-    def __init__(self,url,type):
+    def __init__(self,url,type,exportFileName):
         self.url=url
         self.type=type
+        self.exportFileName=exportFileName
         if Page.rootURL == None:
             Page.rootURL=url
+        #アクセスした（これからする）URLリストに追加
         crawledList.append(url)
+        #自ページ内のリンクを取得
         self.FindMyLinks()
+        #取得したリンクがまだリストに記載されていなければリストに出力する。
         self.Check()
 
-def CrawlSameRootURLs(root):
+def CrawlSameRootURLs(root,exportFileName):
     print('crawlSameRootURLs')
-    Page(root,1)
+    Page(root,1,exportFileName)
 
-
-def CrawlAllURLs(root):
+def CrawlAllURLs(root,exportFileName):
     print('crawlAllURLs')
-    Page(root,0)
+    Page(root,0,exportFileName)
 
 if __name__ == '__main__':
     if len(sys.argv)>=2:
+        exportFileName='list.txt'
         if len(sys.argv)>=3:
             exportFileName=sys.argv[2]
-        CrawlSameRootURLs(sys.argv[1])
+        #処理時間測定開始
+        startTime=time.time()
+        #処理開始
+        CrawlSameRootURLs(sys.argv[1],exportFileName)
+        #処理終了時間
+        endTime=time.time()
+        #追加項目数の表示
         print('Add '+str(counter)+' URLs')
+        #処理時間
+        processingTime=endTime-startTime
+        print('processing time : '+ str(processingTime)+'s')
+        h=processingTime//3600
+        processingTime-=3600*h
+        m=processingTime//60
+        processingTime-=60*m
+        s=processingTime
+        print(str(h)+'h '+str(m)+'m '+str(s)+'s')
         # sleepTime=2
-        # CrawlAllURLs(sys.argv[1])
+        # CrawlAllURLs(sys.argv[1],exportFileName)
     else:
         print('Enter domain as a first argument (and enter export file name as a second argument)')
