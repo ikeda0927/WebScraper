@@ -12,6 +12,8 @@ https://www.ikegon.tk/#heading3
 https://www.ikegon.tk/#heading4
 https://www.ikegon.tk/#heading5
 https://developer.android.com/studio/
+https://akira-watson.com/android/adt-windows.html
+https://akira-watson.com/android/adt-mac.html
 https://www.ikegon.tk/android2.html
 https://www.ikegon.tk/android3.html
 https://www.ikegon.tk/android4.html
