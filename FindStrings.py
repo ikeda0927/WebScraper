@@ -11,14 +11,13 @@ def FindStrings(urlListFile,stringListFile):
     print('FindStrings')
     stringList=None
     urlList=None
-    with open(stringListFile,'r') as f1:
+    with open(stringListFile,'r') as f1:#検索対象文字列の取得
         strings=f1.read()
-    with open(urlListFile,'r') as f2:
+    with open(urlListFile,'r') as f2:#文字列検索対象URLの取得
         urlList=f2.readlines()
-
-    pattern=strings.replace('\n','|')
-    pattern=re.sub('\|$','',pattern)
-    repattern= re.compile(pattern)
+    pattern=strings.replace('\n','|')#正規表現に変換
+    pattern=re.sub('\|$','',pattern)#正規表現の修正
+    repattern= re.compile(pattern)#正規表現のコンパイル
     print('Pattern : '+pattern)
     for url in urlList:
         time.sleep(sleepTime)#Dos攻撃にならないように
@@ -26,7 +25,7 @@ def FindStrings(urlListFile,stringListFile):
         print('ACCESS : '+url)
         data=requests.get(url)#取得
         # print('type : '+str(type(data)))
-        result=repattern.findall(str(data.text))
+        result=repattern.findall(str(data.text))#GETしたレスポンス内に含まれる検索対象文字列の取得
         if len(result)>0:
             with open(resultFile,'a') as f3:
                 f3.write(url+' : '+str(len(result))+'\n')
@@ -39,8 +38,6 @@ if __name__ == '__main__':
         FindStrings(sys.argv[1],sys.argv[2])
         #処理終了時間
         endTime=time.time()
-        #追加項目数の表示
-        # print('Add '+str(counter)+' URLs')
         #処理時間
         processingTime=endTime-startTime
         print('processing time : '+ str(processingTime)+'s')
