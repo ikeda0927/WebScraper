@@ -1,8 +1,9 @@
-# WebScraper
+# WebScraper?
 
 以下のスクリプトを実行する際は全て自己責任でお願いします。
 
 - [Spider.py](https://github.com/ikeda0927/WebScraper#spiderpy)  
+-- [FindStrings.py](https://github.com/ikeda0927/WebScraper#findstringspy) 
 
 ### Spider.py
 ----
@@ -43,7 +44,7 @@ time.sleep(sleepTime)
 ~~~  
 により、  
 
-Getリクエストを送る前に1秒待つようになっていますが、  
+GETリクエストを送る前に1秒待つようになっていますが、  
 これは短時間に多量のリクエストを送信する（Dos攻撃をしてしまう）ことを防ぐためのものとなっているので、  
 絶対に消さない（また、sleepTimeを1秒より小さくしない）でください。  
 
@@ -54,4 +55,18 @@ Getリクエストを送る前に1秒待つようになっていますが、
 ※1 例えば、URLとしてhttps://github.com/ikeda0927/ を指定した場合は、発見したリンクの中でもhttps://github.com/ikeda0927/ から始まるものをのみを対象に再帰的にリンクを探しに行く。  
 もちろん、出力されるファイルには発見した全てのリンクが記される。  
 
-※2 実行することはお勧めしません。
+※2 実行することはお勧めしません。  
+
+### FindStrings.py
+---
+列挙したURLのリストと検索対象文字列のリストを基に検索対象文字列を有するページのURLを列挙し出力します。  
+
+使用方法は  
+~~~
+python3 FindStrings.py listSample.txt stringFileSample.txt
+~~~  
+のように、  
+
+第一引数にURLのリスト、第二引数に検索対象文字列のリストを指定して実行します。  
+
+もし、文字列が見つかった場合はURLと見つかった個数がresult.txtに出力されます。
