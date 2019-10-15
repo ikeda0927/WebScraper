@@ -6,9 +6,33 @@ import time
 
 sleepTime=1
 resultFile='result.txt'
+pattern=None
+repattern=None
+
+def Find(url,data,stringListFile):
+    if stringListFile:
+        if data:
+            if not repattern:
+                SetRegularExpression(stringListFile)
+            result=repattern.findall(str(data.text))#GETしたレスポンス内に含まれる検索対象文字列の取得
+            if len(result)>0:
+                with open(resultFile,'a') as f3:
+                    f3.write(url+' : '+str(len(result))+'\n')
+
+def SetRegularExpression(stringListFile):
+    global pattern
+    global repattern
+    stringList=None
+    with open(stringListFile,'r') as f1:#検索対象文字列の取得
+        strings=f1.read()
+    pattern=strings.replace('\n','|')#正規表現に変換
+    pattern=re.sub('\|$','',pattern)#正規表現の修正
+    repattern= re.compile(pattern)#正規表現のコンパイル
 
 def FindStrings(urlListFile,stringListFile):
     print('FindStrings')
+    global pattern
+    global repattern
     stringList=None
     urlList=None
     with open(stringListFile,'r') as f1:#検索対象文字列の取得
@@ -25,10 +49,11 @@ def FindStrings(urlListFile,stringListFile):
         print('ACCESS : '+url)
         data=requests.get(url)#取得
         # print('type : '+str(type(data)))
-        result=repattern.findall(str(data.text))#GETしたレスポンス内に含まれる検索対象文字列の取得
-        if len(result)>0:
-            with open(resultFile,'a') as f3:
-                f3.write(url+' : '+str(len(result))+'\n')
+        # result=repattern.findall(str(data.text))#GETしたレスポンス内に含まれる検索対象文字列の取得
+        # if len(result)>0:
+        #     with open(resultFile,'a') as f3:
+        #         f3.write(url+' : '+str(len(result))+'\n')
+        Find(url,data,stringListFile)
 
 if __name__ == '__main__':
     if len(sys.argv)>=3:

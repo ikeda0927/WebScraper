@@ -3,6 +3,7 @@ from bs4 import BeautifulSoup
 import re
 import sys
 import time
+import FindStrings
 
 crawledList  = list()
 pattern1     = "^https?://"
@@ -13,6 +14,7 @@ pattern3     = "^/"
 repattern3   = re.compile(pattern3)
 counter      = 0
 sleepTime    = 1
+stringListFile=None
 # exportFileName='list.txt'
 
 class Page:
@@ -25,8 +27,8 @@ class Page:
     def FindMyLinks(self):#linksにそのページ内のリンクを格納する。
         time.sleep(sleepTime)#Dos攻撃にならないように
         print('ACCESS : '+self.url)
-        data=requests.get(self.url)#取得
-        soup=BeautifulSoup(data.text,"html.parser")
+        self.data=requests.get(self.url)#取得
+        soup=BeautifulSoup(self.data.text,"html.parser")
         aList=soup.select('a')#aタグ取得
         for a in aList:
             try:
@@ -49,8 +51,31 @@ class Page:
                 return judge
         return judge
 
-    def Check(self):
+    def Write(self,link):
         global counter
+        with open(self.exportFileName,'a+') as f:
+            f.seek(0)
+            lines=f.readlines()
+            # print('Comparing : '+link)
+            if self.CompareLink(lines,link):
+                counter += 1
+                print('WRITE  : '+link)
+                f.write(link+'\n')
+
+    def WriteAndFind(self,link,data,stringListFile):
+        global counter
+        with open(self.exportFileName,'a+') as f:
+            f.seek(0)
+            lines=f.readlines()
+            # print('Comparing : '+link)
+            if self.CompareLink(lines,link):
+                counter += 1
+                print('WRITE  : '+link)
+                f.write(link+'\n')
+                FindStrings.Find(link,data,stringListFile)
+
+    def Check(self):
+        global stringListFile
         # global exportFileName
         if self.type==0:
             for link in Page.links:
@@ -62,14 +87,7 @@ class Page:
                 if not crawledJudge:
                     Page(link,self.type)
                 #リストをファイルに書き込む
-                with open(self.exportFileName,'a+') as f:
-                    f.seek(0)
-                    lines=f.readlines()
-                    print('Comparing : '+link)
-                    if self.CompareLink(lines,link):
-                        counter += 1
-                        print('WRITE  : '+link)
-                        f.write(link+'\n')
+                Self.Write(link)
         elif self.type==1:
             for link in Page.links:
                 if Page.rootURL in link:#URLがスクリプト実行時に指定したURLで始まるかの確認
@@ -81,18 +99,25 @@ class Page:
                     if not crawledJudge:
                         Page(link,self.type,self.exportFileName)
                     #リストをファイルに書き込む
-                with open(self.exportFileName,'a+') as f:
-                    f.seek(0)#カーソル位置を先頭に戻す
-                    lines=f.readlines()
-                    if self.CompareLink(lines,link):#リストにまだ追加されていなければ書き込む
-                        counter += 1
-                        print('WRITE  : '+link)
-                        f.write(link+'\n')
+                self.Write(link)
+        elif self.type==2:
+            for link in Page.links:
+                if Page.rootURL in link:#URLがスクリプト実行時に指定したURLで始まるかの確認
+                    crawledJudge=False
+                    for crawled in crawledList:
+                        if crawled == link:#もし既にアクセスしていたなら新たにPageインスタンスを作成しない
+                            crawledJudge=True
+                            break
+                    if not crawledJudge:
+                        Page(link,self.type,self.exportFileName)
+                    #リストをファイルに書き込む
+                self.WriteAndFind(link,self.data,stringListFile)
 
     def __init__(self,url,type,exportFileName):
         self.url=url
         self.type=type
         self.exportFileName=exportFileName
+        # self.data=None
         if Page.rootURL == None:
             Page.rootURL=url
         #アクセスした（これからする）URLリストに追加
@@ -106,6 +131,12 @@ def CrawlSameRootURLs(root,exportFileName):
     print('crawlSameRootURLs')
     Page(root,1,exportFileName)
 
+def CrawlSameRootURLsAndScrape(root,exportFileName,myStringListFile):
+    global stringListFile
+    print('crawlSameRootURLs')
+    stringListFile=myStringListFile
+    Page(root,2,exportFileName)
+
 def CrawlAllURLs(root,exportFileName):
     print('crawlAllURLs')
     Page(root,0,exportFileName)
@@ -118,7 +149,11 @@ if __name__ == '__main__':
         #処理時間測定開始
         startTime=time.time()
         #処理開始
-        CrawlSameRootURLs(sys.argv[1],exportFileName)
+        # CrawlSameRootURLs(sys.argv[1],exportFileName)
+        if len(sys.argv)>=4:
+            CrawlSameRootURLsAndScrape(sys.argv[1],exportFileName,sys.argv[3])
+        else:
+            CrawlSameRootURLs(sys.argv[1],exportFileName)
         #処理終了時間
         endTime=time.time()
         #追加項目数の表示
