@@ -3,7 +3,7 @@
 以下のスクリプトを実行する際は全て自己責任でお願いします。
 
 - [Spider.py](https://github.com/ikeda0927/WebScraper#spiderpy)  
-- [FindStrings.py](https://github.com/ikeda0927/WebScraper#findstringspy) 
+- [FindStrings.py](https://github.com/ikeda0927/WebScraper#findstringspy)
 
 ### Spider.py
 ----
@@ -11,51 +11,19 @@
 
 使用方法は  
 ~~~
-Python3 Spider.py https://github.com/ikeda0927/ list.txt
+Python3 Spider.py -u https://github.com/ikeda0927/
 ~~~  
 
 のように、  
 
-第一引数に探したいURL、第二引数（省略可）にURLを書き出すファイル名（ファイルは存在しなくても可）を指定することで、再帰的にリンクを探しに行ってくれます。  
+-uの後に基点となるURLを指定して実行してください。  
 
-Spider.pyをそのまま使う場合、リンクを探す対象となるURLは指定したURLを含むもの※1となっていますが、  
-Spider.pyのスクリプト中の  
-~~~
-CrawlSameRootURLs(sys.argv[1],exportFileName)
-~~~  
-を
-~~~
-#CrawlSameRootURLs(sys.argv[1],exportFileName)
-~~~  
-とし、  
-~~~
-#CrawlAllURLs(sys.argv[1],exportFileName)
-~~~  
-を
-~~~
-CrawlAllURLs(sys.argv[1],exportFileName)
-~~~  
-とすることで、  
-発見した全てのURLを対象に再帰的にURLを探しに行きます。※2  
+オプションについては引数なしで実行すると一覧が出ます。  
 
-また、Spider.pyのスクリプト中の  
-~~~
-time.sleep(sleepTime)
-~~~  
-により、  
-
-GETリクエストを送る前に1秒待つようになっていますが、  
-これは短時間に多量のリクエストを送信する（Dos攻撃をしてしまう）ことを防ぐためのものとなっているので、  
-絶対に消さない（また、sleepTimeを1秒より小さくしない）でください。  
-
-
-
+##### 注意  
+- 再帰的にURLの取得を行っており、その再起にも限度があるので全てのURLを取得できるとは限りません...(コードを書き換えれば限度を緩くすることも可能)
+- -slで指定できる数値はDos攻撃にならないためのリクエストの送信間隔なので大きい方が良いです。
 ---
-
-※1 例えば、URLとしてhttps://github.com/ikeda0927/ を指定した場合は、発見したリンクの中でもhttps://github.com/ikeda0927/ から始まるものをのみを対象に再帰的にリンクを探しに行く。  
-もちろん、出力されるファイルには発見した全てのリンクが記される。  
-
-※2 実行することはお勧めしません。  
 
 ### FindStrings.py
 ---
