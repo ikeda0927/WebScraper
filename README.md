@@ -23,7 +23,6 @@ Python3 Spider.py -u https://github.com/ikeda0927/
 ##### 注意  
 - 再帰的にURLの取得を行っており、その再起にも限度があるので全てのURLを取得できるとは限りません...(コードを書き換えれば限度を緩くすることも可能)
 - -slで指定できる数値はDos攻撃にならないためのリクエストの送信間隔なので大きい方が良いです。
----
 
 ### FindStrings.py
 ---
@@ -31,10 +30,10 @@ Python3 Spider.py -u https://github.com/ikeda0927/
 
 使用方法は  
 ~~~
-python3 FindStrings.py listSample.txt stringFileSample.txt
+python3 FindStrings.py -u listSample.txt -s test1,test2
 ~~~  
 のように、  
 
-第一引数にURLのリスト、第二引数に検索対象文字列のリストを指定して実行します。  
+-uにURLのリスト、-sに検索対象文字列(-rに検索対象文字列のリストファイル名)を指定して実行します。  
 
-もし、文字列が見つかった場合はURLと見つかった個数がresult.txtに出力されます。
+もし、文字列が見つかった場合はURLと見つかった個数がresult.txt(もしくは-eで指定したファイル名)に出力されます。
