@@ -4,8 +4,6 @@ import re
 import sys
 import time
 import FindStrings
-from memory_profiler import profile
-from memory_profiler import memory_usage
 
 crawledList  = list()
 pattern1     = "^https?://"

@@ -3,7 +3,12 @@
 以下のスクリプトを実行する際は全て自己責任でお願いします。
 
 - [Spider.py](https://github.com/ikeda0927/WebScraper#spiderpy)  
-- [FindStrings.py](https://github.com/ikeda0927/WebScraper#findstringspy)
+- [FindStrings.py](https://github.com/ikeda0927/WebScraper#findstringspy)  
+
+また、requestsとbeautifulsoup4がない場合は下記コマンドで入れておいてください。  
+~~~
+pip3 install beautifulsoup4 requests
+~~~
 
 ### Spider.py
 ----
