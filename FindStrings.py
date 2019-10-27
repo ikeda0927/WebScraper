@@ -3,6 +3,8 @@ from bs4 import BeautifulSoup
 import re
 import sys
 import time
+import openpyxl as px
+import glob
 
 sleepTime=1
 resultFile='result.txt'
@@ -10,6 +12,10 @@ pattern=None
 repattern=None
 urlListFileName=None
 tags=None
+excelFile='result.xlsx'
+patternList=None
+repatternList=list()
+exportAsExcel=False
 
 def FindFromFile(url,data,stringListFile):
     if stringListFile:
@@ -20,6 +26,36 @@ def FindFromFile(url,data,stringListFile):
             if len(result)>0:
                 with open(resultFile,'a') as f3:
                     f3.write(url+' : '+str(len(result))+'\n')
+def WriteToExcel(url,data):
+    global pattern
+    global patternList
+    global repatternList
+    global excelFile
+    if(len(repatternList)==0):
+        patternList=pattern.split('|')
+        for p in patternList:
+            repatternList.append(re.compile(p))
+    try:
+        book = px.load_workbook(excelFile)
+        sheet = book.active
+    except FileNotFoundError:
+        book = px.Workbook()
+        sheet = book.active
+        sheet['A1'].value='url'
+        index=66
+        for pat in patternList:
+            sheet[chr(index)+'1'].value=pat
+            index+=1
+    columnNum=1
+    while True:
+        if sheet['A'+str(columnNum)].value==None:
+            break
+        columnNum+=1
+    rowAlp=65
+    sheet['A'+str(columnNum)].value=url
+    for i in range(len(repatternList)):
+        sheet[chr(rowAlp+i+1)+str(columnNum)].value=len(repatternList[i].findall(str(data.text)))
+    book.save(excelFile)
 
 def Find(data):
     if data and repattern:
@@ -28,6 +64,7 @@ def Find(data):
     return 0
 
 def FineWithTags(data):
+
     None
 
 def SetRegularExpressionFromFile(stringListFile):
@@ -70,14 +107,17 @@ def FindStrings(urlListFile):
         if result>0:
             with open(resultFile,'a') as f3:
                 f3.write(url+' : '+str(result)+'\n')
+            if exportAsExcel:
+                WriteToExcel(url,data)
 
 def ShowHelp():
-    print('-u [str]\n\tURLリスト指定(必須)\n-s [str]\n\t走査対象文字列のコマンドライン指定(-rを指定しているなら省略可)\n-r [str]\n\t走査対象文字列ファイルの指定(-sを指定しているなら省略可)\n-e [str]\n\t出力ファイル名指定\n-t [str]\n\t文字列走査対象タグの指定')
+    print('-u [str]\n\tURLリスト指定(必須)\n-s [str]\n\t走査対象文字列のコマンドライン指定(-rを指定しているなら省略可)\n-r [str]\n\t走査対象文字列ファイルの指定(-sを指定しているなら省略可)\n-e [str]\n\t出力ファイル名指定\n-t [str]\n\t文字列走査対象タグの指定\n-ex [str]\n\t指定した名前のエクセルで出力')
 
 if __name__ == '__main__':
     if len(sys.argv)>=2:
         for i in range(1,len(sys.argv),2):
             if sys.argv[i]=='-t':
+                tags=sys.argv[i+1].split(',')
                 print('未実装')
             elif sys.argv[i]=='-s':
                 if len(sys.argv)>=i+2:
@@ -95,6 +135,13 @@ if __name__ == '__main__':
                 if len(sys.argv)>=i+2:
                     temp=sys.argv[i+1]
                     urlListFileName=temp
+            elif sys.argv[i]=='-ex':
+                if len(sys.argv)>=i+2:
+                    temp=sys.argv[i+1]
+                    if not temp in '.xlsx':
+                        temp+='.xlsx'
+                    excelFile=temp
+                    exportAsExcel=True
         if repattern and urlListFileName:
             #処理時間測定開始
             startTime=time.time()
