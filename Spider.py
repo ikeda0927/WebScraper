@@ -35,7 +35,10 @@ class Page:
         global connectionTimeOut
         global readTimeOut
         with requests.Session() as sess:
-            resp = sess.get(url, stream=True,timeout=(connectionTimeOut,readTimeOut), allow_redirects=True)
+            try:
+                resp = sess.get(url, stream=True,timeout=(connectionTimeOut,readTimeOut), allow_redirects=True)
+            except:
+                return None
             # 画像とかpdfは取らないようにcontent-typeがtextのもののみ選ぶ処理
             if not 'content-type' in resp.headers or not 'text' in resp.headers['content-type']:
                 resp=None
@@ -52,7 +55,10 @@ class Page:
             print('Request Timeout : '+self.url)
         if not self.data:
             return False
-        soup=BeautifulSoup(self.data.text,"html.parser")
+        try:
+            soup=BeautifulSoup(self.data.text,"html.parser")
+        except:
+            return False
         aList=soup.select('a')#aタグ取得
         self.data=None
         soup=None

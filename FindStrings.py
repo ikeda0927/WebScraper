@@ -97,7 +97,10 @@ def FindStrings(urlListFile):
         time.sleep(sleepTime)#Dos攻撃にならないように
         url=url.replace('\n','')
         print('ACCESS : '+url)
-        data=requests.get(url)#取得
+        try:
+            data=requests.get(url)#取得
+        except:
+            continue
         # print('type : '+str(type(data)))
         # result=repattern.findall(str(data.text))#GETしたレスポンス内に含まれる検索対象文字列の取得
         # if len(result)>0:
